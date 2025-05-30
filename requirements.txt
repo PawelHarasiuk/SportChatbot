@@ -1,0 +1,10 @@
+requests
+beautifulsoup4
+pytest
+langchain
+langchain-community
+langchain-ollama
+ragas
+openai
+dotenv
+scikit-learn
