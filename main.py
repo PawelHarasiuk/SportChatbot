@@ -18,4 +18,6 @@ if __name__ == "__main__":
         if question.lower() == "exit":
             break
         answer = rag.query(question)
+        print(100 * '=')
         print(f"Odpowiedź: {answer}\n")
+        print(100 * '=')
