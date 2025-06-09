@@ -1,17 +1,14 @@
-import os
-import sys
 import logging
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
 import openai
-from scrapper.scrapper import MeczykiScrapper
 
 logging.basicConfig(level=logging.INFO)
 
 class MeczykiRAG:
     def __init__(self, openai_api_key):
-        self.scraper = MeczykiScrapper()
+        # self.scraper = MeczykiScrapper()
         self.docs = []
         self.articles = []
         self.doc_vectors = None
@@ -20,8 +17,9 @@ class MeczykiRAG:
 
     def load_articles(self):
         logging.info("Scrapping articles...")
-        self.scraper.scrap()
-        self.articles = self.scraper.get_articles()
+        # self.scraper.scrap()
+        # self.articles = self.scraper.get_articles()
+        self.articles = [{'text': 'test'}]
         self.docs = [article['text'] for article in self.articles if article['text']]
 
         if not self.docs:
