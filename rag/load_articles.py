@@ -10,7 +10,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def load_articles(folder="../articles"):
+def load_articles(folder="./data/articles/"):
     articles = []
 
     if not os.path.exists(folder):

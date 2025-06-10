@@ -1,4 +1,5 @@
 import json
+import os
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -48,14 +49,19 @@ def get_urls(root_url):
 def scrap():
     root_url = 'https://www.meczyki.pl'
     urls = get_urls(root_url)
-    index = 1
     today = datetime.today().strftime('%Y-%m-%d')
+    existing_articles = set(os.listdir('./data/articles/'))
+    index = 1
     for url in urls:
         article = get_article(root_url + url)
         if article['title'] and article['text']:
-            with open(f'../articles/{today}_{index}.json', 'w') as f:
-                json.dump(article, f)
-            index += 1
+            title = f'{today}_{index}.json'
+            if title not in existing_articles:
+                with open(f'./data/articles/{title}', 'w', encoding='utf-8') as f:
+                    json.dump(article, f, ensure_ascii=False)
+                index += 1
+            else:
+                logging.error(f'Article {title} already exists')
 
 
 scrap()
