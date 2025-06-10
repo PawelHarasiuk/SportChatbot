@@ -8,3 +8,5 @@ ragas
 openai
 dotenv
 scikit-learn
+flask
+chromadb

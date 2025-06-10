@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  scraper:
+    build: .
+    container_name: rag_scraper
+    restart: unless-stopped
+    environment:
+      - SERVICE=scraper
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - articles_data:/app/data/articles
+
+  rag_updater:
+    build: .
+    container_name: rag_updater
+    restart: unless-stopped
+    environment:
+      - SERVICE=rag
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - articles_data:/app/data/articles
+      - vectorstore_data:/app/data/vectorstore/chroma
+
+  backend:
+    build: .
+    container_name: rag_backend
+    restart: unless-stopped
+    environment:
+      - SERVICE=backend
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - VECTORSTORE_DIR=/app/data/vectorstore/chroma
+    volumes:
+      - vectorstore_data:/app/data/vectorstore/chroma
+    ports:
+      - "8000:5000"
+
+volumes:
+  articles_data:
+  vectorstore_data:
