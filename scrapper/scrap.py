@@ -11,7 +11,6 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# MongoDB connection setup
 mongodb_uri = os.getenv('MONGODB_URI', 'mongodb://admin:password@localhost:27017/')
 client = MongoClient(mongodb_uri, unicode_decode_error_handler='ignore')
 db = client['scraper_db']
@@ -21,7 +20,6 @@ articles_collection = db['articles']
 
 def get_article(url):
     response = requests.get(url)
-    # Set the proper encoding from the response
     response.encoding = response.apparent_encoding
 
     if response.status_code != 200:
@@ -67,7 +65,6 @@ def scrap():
 
     for url in urls:
         full_url = root_url + url
-        # Check if article already exists in MongoDB
         if not articles_collection.find_one({'url': full_url}):
             article = get_article(full_url)
             if article['title'] and article['text']:

@@ -10,8 +10,6 @@ logging.basicConfig(
 
 
 def process_articles(articles: List[Dict]) -> List[Document]:
-    """Convert articles to Documents for vectorstore."""
-
     docs = []
     for article in articles:
         text = article.get("text", "")
@@ -32,7 +30,6 @@ def process_articles(articles: List[Dict]) -> List[Document]:
 
 
 def embed_and_store(docs: List[Document], persist_directory: str = "data/vectorstore/chroma"):
-    """Embed documents and store them in the vectorstore."""
     if not docs:
         print("No documents to save")
         return

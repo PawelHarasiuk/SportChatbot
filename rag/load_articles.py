@@ -16,8 +16,6 @@ db = client['scraper_db']
 articles_collection = db['articles']
 
 def load_articles():
-    articles = []
-
     today = datetime.utcnow()
     start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
     end_of_day = start_of_day + timedelta(days=1)
@@ -35,7 +33,6 @@ def load_articles():
 
         articles = list(cursor)
 
-        # Ensure proper encoding for any string fields
         for article in articles:
             if 'title' in article:
                 article['title'] = article['title'].encode('utf-8').decode('utf-8')
