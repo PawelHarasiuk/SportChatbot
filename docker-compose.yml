@@ -21,8 +21,6 @@ services:
       - SERVICE=scraper
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - MONGODB_URI=mongodb://admin:password@mongodb:27017/
-#    volumes:
-#      - articles_data:/app/data/articles
     depends_on:
       - mongodb
 
@@ -35,7 +33,6 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - MONGODB_URI=mongodb://admin:password@mongodb:27017/
     volumes:
-#      - articles_data:/app/data/articles
       - vectorstore_data:/app/data/vectorstore/chroma
     depends_on:
       - mongodb
@@ -55,15 +52,19 @@ services:
       - "8000:5000"
     depends_on:
       - mongodb
-  steamlit_app:
+
+  frontend:
     build: .
+    container_name: rag_frontend
+    restart: unless-stopped
     environment:
-      - SERVICE=streamlit_app
-      - BACKEND_URL=http://backend:8000
+      - SERVICE=frontend
+      - FLASK_BACKEND_URL=http://backend:5000
     ports:
       - "8501:8501"
-    volumes:
-      - .:/app
+    depends_on:
+      - backend
+
 
 volumes:
   articles_data:
