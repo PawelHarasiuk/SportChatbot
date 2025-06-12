@@ -10,3 +10,4 @@ dotenv
 scikit-learn
 flask
 chromadb
+streamlit
