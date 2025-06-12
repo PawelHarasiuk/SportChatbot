@@ -1,42 +1,60 @@
 version: '3.8'
 
 services:
+  mongodb:
+    image: mongo:latest
+    container_name: rag_mongodb
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
   scraper:
     build: .
-
     container_name: rag_scraper
-    # restart: unless-stopped
+    restart: unless-stopped
     environment:
       - SERVICE=scraper
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-    volumes:
-      - articles_data:/app/data/articles
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/
+#    volumes:
+#      - articles_data:/app/data/articles
+    depends_on:
+      - mongodb
 
   rag_updater:
-    build:
-      context: .
+    build: .
     container_name: rag_updater
-    # restart: unless-stopped
+    restart: unless-stopped
     environment:
       - SERVICE=rag
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/
     volumes:
-      - articles_data:/app/data/articles
+#      - articles_data:/app/data/articles
       - vectorstore_data:/app/data/vectorstore/chroma
+    depends_on:
+      - mongodb
 
   backend:
-    build: 
-      context: .
+    build: .
     container_name: rag_backend
-    # restart: unless-stopped
+    restart: unless-stopped
     environment:
       - SERVICE=backend
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - VECTORSTORE_DIR=/app/data/vectorstore/chroma
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/
     volumes:
       - vectorstore_data:/app/data/vectorstore/chroma
     ports:
       - "8000:5000"
+    depends_on:
+      - mongodb
   steamlit_app:
     build: .
     environment:
@@ -50,3 +68,4 @@ services:
 volumes:
   articles_data:
   vectorstore_data:
+  mongodb_data:

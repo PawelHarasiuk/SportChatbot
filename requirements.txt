@@ -10,4 +10,5 @@ dotenv
 scikit-learn
 flask
 chromadb
+pymongo
 streamlit

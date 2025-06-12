@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, json
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.llms import OpenAI
@@ -38,19 +38,12 @@ def health():
 
 @app.route("/query", methods=["POST"])
 def query():
-    """
-    Przyjmuje JSON: {"query": "tekst pytania"}
-    Zwraca JSON:
-    {
-      "answer": "...",
-      "sources": [ {metadata artykułu}, ... ]
-    }
-    """
+    prompt_engineering = 'Napisz wszystko co wiesz na podany temat.'
     data = request.get_json(silent=True)
     if not data or "query" not in data:
         return jsonify({"error": "Proszę podać pole 'query' w body requestu"}), 400
 
-    query_text = data["query"]
+    query_text = data["query"] + " " + prompt_engineering
     try:
 
         result = qa_chain({"query": query_text})
@@ -61,10 +54,18 @@ def query():
         for doc in docs:
             # metadata to dict, np. {"title": ..., "url": ..., "date": ...}
             sources.append(doc.metadata)
-        return jsonify({
+
+        # Ensure proper encoding of the response
+        response_data = {
             "answer": answer,
             "sources": sources
-        }), 200
+        }
+
+        return app.response_class(
+            response=json.dumps(response_data, ensure_ascii=False),
+            status=200,
+            mimetype='application/json'
+        )
     except Exception as e:
          # W razie błędu zwracamy kod 500
         print("--- BŁĄD W OBSŁUDZE ZAPYTANIA /query ---")
@@ -73,7 +74,6 @@ def query():
         # W razie błędu zwracamy kod 500
         return jsonify({"error": str(e)}), 500
 
+
 if __name__ == "__main__":
-    # Uruchamiamy Flask bezpośrednio
-    # Host 0.0.0.0, port 5000 (mapowany w docker-compose)
     app.run(host="0.0.0.0", port=5000)

@@ -1,7 +1,7 @@
-import json
-import os
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
+from pymongo import MongoClient
+import os
 
 logging.basicConfig(
     level=logging.INFO,
@@ -9,32 +9,43 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# MongoDB connection setup
+mongodb_uri = os.getenv('MONGODB_URI', 'mongodb://admin:password@localhost:27017/')
+client = MongoClient(mongodb_uri, unicode_decode_error_handler='ignore')
+db = client['scraper_db']
+articles_collection = db['articles']
 
-def load_articles(folder="./data/articles/"):
+def load_articles():
     articles = []
 
-    if not os.path.exists(folder):
-        logger.warning(f"Folder '{folder}' does not exist.")
-        return articles
+    today = datetime.utcnow()
+    start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_of_day = start_of_day + timedelta(days=1)
 
-    today = datetime.today().strftime('%Y-%m-%d')
+    try:
+        cursor = articles_collection.find(
+            {
+                'scraped_at': {
+                    '$gte': start_of_day,
+                    '$lt': end_of_day
+                }
+            },
+            collation={'locale': 'pl'}
+        )
 
-    for fname in os.listdir(folder):
-        if fname.endswith(".json"):
-            path = os.path.join(folder, fname)
-            try:
-                with open(path, encoding="utf-8") as f:
-                    if fname.startswith(today):
-                        data = json.load(f)
-                        if isinstance(data, dict):
-                            articles.append(data)
-                        elif isinstance(data, list):
-                            articles.extend(data)
-                        logger.info(f"Loaded {len(data) if isinstance(data, list) else 1} articles from {fname}")
-                    else:
-                        logger.debug(f"Skipping file not from today: {fname}")
-            except Exception as e:
-                logger.error(f"Could not read file {path}: {e}")
+        articles = list(cursor)
 
-    logger.info(f"Total articles loaded: {len(articles)}")
+        # Ensure proper encoding for any string fields
+        for article in articles:
+            if 'title' in article:
+                article['title'] = article['title'].encode('utf-8').decode('utf-8')
+            if 'text' in article:
+                article['text'] = article['text'].encode('utf-8').decode('utf-8')
+
+        logger.info(f"Total articles loaded from MongoDB: {len(articles)}")
+
+    except Exception as e:
+        logger.error(f"Error loading articles from MongoDB: {e}")
+        return []
+
     return articles
