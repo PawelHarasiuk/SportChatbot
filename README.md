@@ -96,4 +96,4 @@ The system uses Docker volumes for persistent storage:
 - : For ChromaDB vector store `vectorstore_data`
 
 ## Architecture Design
-
+<img width="388" alt="Image" src="https://github.com/user-attachments/assets/ef834bf1-2a88-4b30-838c-ffce10409ab2" />
