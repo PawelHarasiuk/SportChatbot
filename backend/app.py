@@ -4,8 +4,9 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
+from dotenv import load_dotenv
 app = Flask(__name__)
-
+load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY nie jest ustawione w środowisku")

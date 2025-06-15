@@ -7,7 +7,7 @@ import os
 FLASK_BACKEND_URL = os.getenv("FLASK_BACKEND_URL", "http://localhost:8000") 
 
 
-st.set_page_config(page_title="Mój Asystent AI", layout="centered")
+st.set_page_config(page_title="SportChatBot", layout="centered")
 
 st.title("🤖 SportChatBot")
 st.write("Hej! Jestem tu żeby ułatwić ci dostęp do nowinek z świata sportu.")
@@ -41,28 +41,8 @@ if query:
 
                 result = response.json()
                 answer = result.get("answer", "Nie udało mi się znaleźć odpowiedzi.")
-                #sources = result.get("sources", [])
-
                 st.markdown(answer)
-
-
-                # if sources:
-                #     st.markdown("---") 
-                #     st.markdown("**Źródła:**")
-                #     for i, source in enumerate(sources):
-                #         title = source.get("title", f"Dokument {i+1}")
-                #         url = source.get("url", "#")
-                #         if url and url != "#":
-                #             st.markdown(f"- [{title}]({url})")
-                #         else:
-                #             st.markdown(f"- {title}")
-                        
-
                 st.session_state.messages.append({"role": "assistant", "content": answer})
-                # if sources:
-                #     source_content = "\n\n**Źródła:**\n" + "\n".join([f"- [{s.get('title', 'Brak tytułu')}]({s.get('url', '#')})" for s in sources])
-                #     st.session_state.messages[-1]["content"] += source_content
-
 
             except requests.exceptions.ConnectionError:
                 st.error("Błąd połączenia z backendem. Upewnij się, że serwer Flask działa.")
