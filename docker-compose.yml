@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:latest
@@ -13,16 +11,34 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  selenium:
+    image: selenium/standalone-chrome:latest
+    container_name: rag_selenium
+    platform: linux/amd64
+    shm_size: '2gb'
+    ports:
+      - "4444:4444"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4444/wd/hub/status" ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
+
   scraper:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: rag_scraper
     restart: unless-stopped
     environment:
       - SERVICE=scraper
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - MONGODB_URI=mongodb://admin:password@mongodb:27017/
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/?authSource=admin
+      - SELENIUM_REMOTE_URL=http://selenium:4444/wd/hub
     depends_on:
-      - mongodb
+      selenium:
+        condition: service_healthy
 
   rag_updater:
     build: .
@@ -63,7 +79,8 @@ services:
     ports:
       - "8501:8501"
     depends_on:
-      - backend
+      backend:
+        condition: service_started
 
 
 volumes:

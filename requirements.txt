@@ -12,3 +12,4 @@ flask
 chromadb
 pymongo
 streamlit
+selenium

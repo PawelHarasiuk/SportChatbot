@@ -7,7 +7,7 @@ fi
 
 if [ "$SERVICE" = "scraper" ]; then
   echo "[`date`] Initial scrape"
-  python /app/scrapper/scrap.py || echo "Pierwszy scraping zakończony błędem"
+  python /app/scrapper/scrap_sports.py || echo "Pierwszy scraping zakończony błędem"
 elif [ "$SERVICE" = "rag" ]; then
   echo "[`date`] Initial RAG update"
   python /app/run_rag_update.py || echo "Pierwszy run_rag_update błędny"
@@ -25,7 +25,7 @@ fi
 while true; do
   if [ "$SERVICE" = "scraper" ]; then
     echo "[`date`] Running scraper..."
-    python /app/scrapper/scrap.py || echo "Scraper error"
+    python /app/scrapper/scrap_sports.py || echo "Scraper error"
   elif [ "$SERVICE" = "rag" ]; then
     echo "[`date`] Running RAG update..."
     python /app/run_rag_update.py || echo "RAG update error"
