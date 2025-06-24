@@ -12,17 +12,23 @@ services:
       - mongodb_data:/data/db
 
   selenium:
-    image: selenium/standalone-chrome:latest
-    container_name: rag_selenium
+    image: selenium/standalone-chrome:118.0
+    container_name: selenium
     shm_size: '2gb'
+    environment:
+      - SE_NODE_MAX_SESSIONS=4
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_SESSION_TIMEOUT=300
     ports:
       - "4444:4444"
+      - "7900:7900"  # VNC port for debugging
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:4444/wd/hub/status" ]
-      interval: 5s
-      timeout: 2s
-      retries: 10
-      start_period: 10s
+      test: [ "CMD", "wget", "--spider", "http://localhost:4444/wd/hub/status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
 
   scraper:
     build:
