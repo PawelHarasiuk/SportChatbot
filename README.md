@@ -1,10 +1,5 @@
 # SportChatbot
 
-## Live Demo
-
-The application is deployed and accessible at:
-http://ec2-18-184-220-197.eu-central-1.compute.amazonaws.com:8501
-
 ## Project Overview
 
 This project implements a RAG (Retrieval-Augmented Generation) system that combines document retrieval with generative
