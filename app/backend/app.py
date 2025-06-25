@@ -1,10 +1,11 @@
 import os
 from flask import Flask, request, jsonify, json
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_chroma import Chroma
 from langchain.chains import RetrievalQA
-from langchain.chat_models import ChatOpenAI
+from langchain_core.prompts import PromptTemplate
 from dotenv import load_dotenv
+
 app = Flask(__name__)
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -19,11 +20,33 @@ vectorstore = Chroma(
     embedding_function=embeddings
 )
 
-llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, temperature=0,model_name="gpt-4o-mini")
+llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, temperature=0, model_name="gpt-4o-mini")
+
+
+qa_template_content = """Jesteś pomocnym asystentem AI, specjalizującym się WYŁĄCZNIE w tematyce sportowej.
+Użyj swojej ogólnej wiedzy o sporcie, aby odpowiadać na szerokie pytania i udzielać podstawowych informacji.
+Kiedy jednak potrzebujesz informacji o konkretnych wydarzeniach, aktualnościach lub szczegółach, **priorytetowo bazuj na dostarczonych dokumentach sportowych (Kontekst).**
+Połącz swoją wiedzę z informacjami z Kontekstu, aby udzielić jak najbardziej kompletnej i trafnej odpowiedzi.
+
+Niezależnie od dokładnego sformułowania pytania o sport (np. "nowinki", "co się ostatnio działo", "aktualności", "opowiedz o"), zawsze staraj się znaleźć i podać najbardziej istotne i dostępne informacje sportowe, wykorzystując zarówno swoją wiedzę, jak i dostarczony kontekst.
+
+Jeśli pytanie użytkownika NIE dotyczy sportu, LUB jeśli mimo interpretacji pytania jako prośby o sportowe informacje (po przeszukaniu zarówno swojej wiedzy, jak i Kontekstu), dostarczone dokumenty sportowe ABOSOLUTNIE NIE zawierają ŻADNYCH RELEWANTNYCH danych, a Twoja wiedza ogólna również nie pozwala na udzielenie satysfakcjonującej odpowiedzi, poinformuj go, że jesteś wyspecjalizowanym asystentem sportowym i nie możesz odpowiedzieć na to pytanie, lub że nie masz wystarczających informacji sportowych na ten temat. Zachowaj uprzejmy ton.
+Odpowiadaj zwięźle i na temat, trzymając się ścisłej tematyki sportowej i wykorzystując każdą pasującą informację.
+
+Kontekst:
+{context}
+
+Pytanie użytkownika:
+{question}
+
+Odpowiedź:"""
+QA_PROMPT = PromptTemplate(template=qa_template_content, input_variables=["context", "question"])
+
 qa_chain = RetrievalQA.from_llm(
     llm,
     retriever=vectorstore.as_retriever(search_kwargs={"k": 5}),
-    return_source_documents=True
+    return_source_documents=True,
+    prompt=QA_PROMPT
 )
 
 @app.route("/health", methods=["GET"])
@@ -32,14 +55,13 @@ def health():
 
 @app.route("/query", methods=["POST"])
 def query():
-    prompt_engineering = 'Napisz wszystko co wiesz na podany temat.'
     data = request.get_json(silent=True)
     if not data or "query" not in data:
         return jsonify({"error": "Proszę podać pole 'query' w body requestu"}), 400
 
-    query_text = data["query"] + " " + prompt_engineering
+    query_text = data["query"]
+    
     try:
-
         result = qa_chain({"query": query_text})
         answer = result.get("result")
         docs = result.get("source_documents", [])
@@ -58,6 +80,7 @@ def query():
             mimetype='application/json'
         )
     except Exception as e:
+        print(f"Błąd podczas obsługi zapytania: {e}") 
         return jsonify({"error": str(e)}), 500
 
 

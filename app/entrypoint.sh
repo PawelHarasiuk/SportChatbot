@@ -30,5 +30,5 @@ while true; do
     echo "[`date`] Running RAG update..."
     python /app/run_rag_update.py || echo "RAG update error"
   fi
-  sleep 86400
+  sleep 120
 done

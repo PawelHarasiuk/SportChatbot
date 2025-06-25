@@ -13,3 +13,8 @@ chromadb
 pymongo
 streamlit
 selenium
+langsmith 
+langchain-core
+langchain-openai  
+langchain-chroma  
+tiktoken

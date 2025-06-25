@@ -1,7 +1,8 @@
 import os
+from dotenv import load_dotenv
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
-
+load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 def get_embeddings():

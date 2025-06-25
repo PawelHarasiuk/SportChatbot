@@ -4,13 +4,13 @@ import json
 import os
 
 
-FLASK_BACKEND_URL = os.getenv("FLASK_BACKEND_URL", "http://localhost:8000") 
+FLASK_BACKEND_URL = os.getenv("FLASK_BACKEND_URL", "http://0.0.0.0:5000") 
 
 
 st.set_page_config(page_title="SportChatBot", layout="centered")
 
 st.title("🤖 SportChatBot")
-st.write("Hej! Jestem tu żeby ułatwić ci dostęp do nowinek z świata sportu.")
+st.write("Hej! Jestem tu żeby ułatwić ci dostęp do nowinek z świata sportu. Specjalizuje się w piłce nożnej, koszykówce, piłce ręcznej, siatkówce, tenisie oraz lekkoatletyce.")
 
 
 if "messages" not in st.session_state:
